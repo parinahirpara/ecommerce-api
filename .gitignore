@@ -1,0 +1,9 @@
+# Ignore Visual Studio configurations everywhere
+**/.vs/
+**/*.slnx
+**/*.suo
+**/*.user
+
+# Ignore build outputs in any subfolder (Fixes your bin/obj issue!)
+**/bin/
+**/obj/
