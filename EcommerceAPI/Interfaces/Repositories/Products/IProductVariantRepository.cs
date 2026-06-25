@@ -1,4 +1,5 @@
 ﻿using EcommerceAPI.Models.Products;
+using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceAPI.Interfaces.Repositories.Products
 {
@@ -7,5 +8,6 @@ namespace EcommerceAPI.Interfaces.Repositories.Products
         Task<IEnumerable<ProductVariant>> GetAllVariantsAsync();
         Task<ProductVariant?> GetVariantByIdAsync(Guid id); // 👈 Must be Guid
         Task<bool> DeleteVariantAsync(Guid id);
+      
     }
 }

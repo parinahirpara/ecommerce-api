@@ -34,6 +34,7 @@ namespace EcommerceAPI.Services
             };
 
             await _staffRepository.AddAsync(staff);
+            await _staffRepository.SaveChangesAsync();
 
             return true;
         }

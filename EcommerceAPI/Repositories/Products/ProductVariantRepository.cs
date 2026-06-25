@@ -11,11 +11,11 @@ namespace EcommerceAPI.Repositories.Products
 
         public async Task<IEnumerable<ProductVariant>> GetAllVariantsAsync()
         {
-            // Includes the parent Product relationship and child gallery image collections explicitly 
             return await _dbContext.ProductVariants
                 .Include(pv => pv.Product)
+                .Include(pv => pv.Material)
                 .Include(pv => pv.Images)
-                .OrderByDescending(pv => pv.VariantId)
+                .OrderByDescending(pv => pv.Id)
                 .ToListAsync();
         }
 
@@ -23,7 +23,7 @@ namespace EcommerceAPI.Repositories.Products
         {
             return await _dbContext.ProductVariants
                 .Include(pv => pv.Images)
-                .FirstOrDefaultAsync(pv => pv.VariantId == id);
+                .FirstOrDefaultAsync(pv => pv.Id == id);
         }
 
         public async Task<bool> DeleteVariantAsync(Guid id) 
@@ -40,5 +40,6 @@ namespace EcommerceAPI.Repositories.Products
             var rowsAffected = await _dbContext.SaveChangesAsync();
             return rowsAffected > 0;
         }
+
     }
 }

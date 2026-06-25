@@ -24,11 +24,9 @@ namespace EcommerceAPI.Migrations
 
             modelBuilder.Entity("EcommerceAPI.Models.Products.Category", b =>
                 {
-                    b.Property<int>("CategoryId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryId"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("CategoryName")
                         .IsRequired()
@@ -46,7 +44,7 @@ namespace EcommerceAPI.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.HasKey("CategoryId");
+                    b.HasKey("Id");
 
                     b.HasIndex("CategoryName")
                         .IsUnique();
@@ -54,15 +52,39 @@ namespace EcommerceAPI.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("EcommerceAPI.Models.Products.Product", b =>
+            modelBuilder.Entity("EcommerceAPI.Models.Products.Material", b =>
                 {
-                    b.Property<Guid>("ProductId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("CategoryId")
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("MaterialName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MaterialName")
+                        .IsUnique();
+
+                    b.ToTable("Materials");
+                });
+
+            modelBuilder.Entity("EcommerceAPI.Models.Products.Product", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
@@ -93,26 +115,23 @@ namespace EcommerceAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ProductTitle")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid>("SubCategoryId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("SubCategoryId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasKey("Id");
 
-                    b.HasKey("ProductId");
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("SubCategoryId");
 
                     b.ToTable("Products");
                 });
 
             modelBuilder.Entity("EcommerceAPI.Models.Products.ProductImage", b =>
                 {
-                    b.Property<int>("ImageId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ImageId"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("AltText")
                         .IsRequired()
@@ -133,7 +152,7 @@ namespace EcommerceAPI.Migrations
                     b.Property<Guid?>("ProductVariantId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("ImageId");
+                    b.HasKey("Id");
 
                     b.HasIndex("ProductId");
 
@@ -144,14 +163,19 @@ namespace EcommerceAPI.Migrations
 
             modelBuilder.Entity("EcommerceAPI.Models.Products.ProductVariant", b =>
                 {
-                    b.Property<Guid>("VariantId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("DiscountPercentage")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<Guid>("MaterialId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<Guid>("ProductId")
@@ -169,9 +193,12 @@ namespace EcommerceAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Weight")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.HasKey("VariantId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("MaterialId");
 
                     b.HasIndex("ProductId");
 
@@ -180,14 +207,12 @@ namespace EcommerceAPI.Migrations
 
             modelBuilder.Entity("EcommerceAPI.Models.Products.SubCategory", b =>
                 {
-                    b.Property<int>("SubCategoryId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uniqueidentifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SubCategoryId"));
-
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
@@ -205,7 +230,7 @@ namespace EcommerceAPI.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.HasKey("SubCategoryId");
+                    b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
 
@@ -248,6 +273,25 @@ namespace EcommerceAPI.Migrations
                     b.ToTable("Staffs");
                 });
 
+            modelBuilder.Entity("EcommerceAPI.Models.Products.Product", b =>
+                {
+                    b.HasOne("EcommerceAPI.Models.Products.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("EcommerceAPI.Models.Products.SubCategory", "SubCategory")
+                        .WithMany()
+                        .HasForeignKey("SubCategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("SubCategory");
+                });
+
             modelBuilder.Entity("EcommerceAPI.Models.Products.ProductImage", b =>
                 {
                     b.HasOne("EcommerceAPI.Models.Products.Product", "Product")
@@ -268,11 +312,19 @@ namespace EcommerceAPI.Migrations
 
             modelBuilder.Entity("EcommerceAPI.Models.Products.ProductVariant", b =>
                 {
+                    b.HasOne("EcommerceAPI.Models.Products.Material", "Material")
+                        .WithMany()
+                        .HasForeignKey("MaterialId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("EcommerceAPI.Models.Products.Product", "Product")
                         .WithMany("Variants")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Material");
 
                     b.Navigation("Product");
                 });

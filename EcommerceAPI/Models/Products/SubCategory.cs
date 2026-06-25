@@ -3,12 +3,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EcommerceAPI.Models.Products
 {
-    public class SubCategory
+    public class SubCategory : BaseEntity
     {
-        public int SubCategoryId { get; set; }
-
-        // Foreign Key to Category Master Table
-        public int CategoryId { get; set; }
+        public Guid CategoryId { get; set; }
 
         [Required]
         [StringLength(100)]

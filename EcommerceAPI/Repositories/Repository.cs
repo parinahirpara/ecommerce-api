@@ -18,7 +18,6 @@ namespace EcommerceAPI.Repositories
         public virtual async Task AddAsync(T entity)
         {
             await _dbContextSet.AddAsync(entity);
-            await _dbContext.SaveChangesAsync();
         }
         public virtual async Task<T?> GetAsync(Guid id)
         {
@@ -28,20 +27,22 @@ namespace EcommerceAPI.Repositories
         {
             return await _dbContextSet.ToListAsync();
         }
-        public virtual async Task Delete(T entity)
+        public virtual void Delete(T entity)
         {
             _dbContextSet.Remove(entity);
-            await _dbContext.SaveChangesAsync();
         }
-        public virtual async Task Update(T entity)
+        public virtual void Update(T entity)
         {
             _dbContextSet.Update(entity);
-            await _dbContext.SaveChangesAsync();
         }
 
         public virtual async Task<T?> GetByIdAsync(object id)
         {
             return await _dbContextSet.FindAsync(id);
+        }
+        public async Task<int> SaveChangesAsync()
+        {
+            return await _dbContext.SaveChangesAsync();
         }
     }
 }

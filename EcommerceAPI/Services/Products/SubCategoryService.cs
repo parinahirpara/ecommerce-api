@@ -1,79 +1,84 @@
-﻿using EcommerceAPI.Dto.Products;
+﻿using AutoMapper;
+using EcommerceAPI.Dto.Admin.Products;
 using EcommerceAPI.Interfaces.Repositories.Products;
 using EcommerceAPI.Interfaces.Services.Products;
 using EcommerceAPI.Models.Products;
+using EcommerceAPI.Repositories.Products;
 
 namespace EcommerceAPI.Services.Products
 {
     public class SubCategoryService : ISubCategoryService
     {
-        private readonly ISubCategoryRepository _subCategoryRepo;
-        private readonly ICategoryRepository _categoryRepo; // Verified parent helper instance
+        private readonly ISubCategoryRepository _subCategoryRepository;
+        private readonly ICategoryRepository _categoryRepository; 
+        private readonly IMapper _mapper;
 
-        public SubCategoryService(ISubCategoryRepository subCategoryRepo, ICategoryRepository categoryRepo)
+        public SubCategoryService(ISubCategoryRepository subCategoryRepository, ICategoryRepository categoryRepository, IMapper mapper)
         {
-            _subCategoryRepo = subCategoryRepo;
-            _categoryRepo = categoryRepo;
+            _subCategoryRepository = subCategoryRepository;
+            _categoryRepository = categoryRepository;
+            _mapper = mapper;
         }
 
-        public async Task<IEnumerable<SubCategory>> GetAllSubCategoriesAsync()
+        public async Task<IEnumerable<SubCategoryDto>> GetAllSubCategoriesAsync()
         {
-            return await _subCategoryRepo.GetAllWithCategoryAsync();
+            var subCategories = await _subCategoryRepository.GetAllWithCategoryAsync();
+
+            return _mapper.Map<IEnumerable<SubCategoryDto>>(subCategories);
+        }
+        
+
+        public async Task<IEnumerable<SubCategoryDto>> GetSubCategoriesByCategoryIdAsync(Guid categoryId)
+        {
+            var subCategories = await _subCategoryRepository.GetSubCategoriesByCategoryIdAsync(categoryId);
+            return _mapper.Map<IEnumerable<SubCategoryDto>>(subCategories);
         }
 
-        public async Task<IEnumerable<SubCategory>> GetSubCategoriesByCategoryIdAsync(int categoryId)
+        public async Task<SubCategoryDto?> GetSubCategoryByIdAsync(Guid id)
         {
-            return await _subCategoryRepo.GetSubCategoriesByCategoryIdAsync(categoryId);
+            var subCategory = await _subCategoryRepository.GetByIdAsync(id);
+            if (subCategory == null) return null;
+
+            return _mapper.Map<SubCategoryDto>(subCategory);
         }
 
-        public async Task<SubCategory?> GetSubCategoryByIdAsync(int id)
-        {
-            return await _subCategoryRepo.GetByIdAsync(id);
-        }
-
-        public async Task<SubCategory?> CreateSubCategoryAsync(SubCategoryDto dto)
+        public async Task<SubCategoryDto?> CreateSubCategoryAsync(SubCategoryDto dto)
         {
             // 1. Verify the parent category physically exists in the database
-            var parentExists = await _categoryRepo.GetByIdAsync(dto.CategoryId);
+            var parentExists = await _categoryRepository.GetByIdAsync(dto.CategoryId);
             if (parentExists == null) return null; // Reject mapping if orphan key
 
-            var subCategory = new SubCategory
-            {
-                CategoryId = dto.CategoryId,
-                SubCategoryName = dto.SubCategoryName.Trim(),
-                Description = dto.Description,
-                IsActive = dto.IsActive,
-                CreatedDate = DateTime.UtcNow
-            };
+            var subCategory = _mapper.Map<SubCategory>(dto);
+            subCategory.SubCategoryName = dto.SubCategoryName.Trim();
+            subCategory.CreatedDate = DateTime.UtcNow;
 
-            await _subCategoryRepo.AddAsync(subCategory); // Internally saves changes safely
-            return subCategory;
+            await _subCategoryRepository.AddAsync(subCategory); // Internally saves changes safely
+            await _subCategoryRepository.SaveChangesAsync();
+
+            return _mapper.Map<SubCategoryDto>(subCategory);
         }
 
-        public async Task<SubCategory?> UpdateSubCategoryAsync(int id, SubCategoryDto dto)
+        public async Task<SubCategoryDto?> UpdateSubCategoryAsync(Guid id, SubCategoryDto dto)
         {
-            var existingSub = await _subCategoryRepo.GetByIdAsync(id);
+            SubCategory existingSub = await _subCategoryRepository.GetByIdAsync(id);
             if (existingSub == null) return null;
 
-            // Verify parent structural change safety
-            var parentExists = await _categoryRepo.GetByIdAsync(dto.CategoryId);
-            if (parentExists == null) return null;
-
-            existingSub.CategoryId = dto.CategoryId;
+            _mapper.Map(dto, existingSub);
             existingSub.SubCategoryName = dto.SubCategoryName.Trim();
-            existingSub.Description = dto.Description;
-            existingSub.IsActive = dto.IsActive;
 
-            await _subCategoryRepo.Update(existingSub);
-            return existingSub;
+            _subCategoryRepository.Update(existingSub);
+            await _subCategoryRepository.SaveChangesAsync();
+
+            return _mapper.Map<SubCategoryDto>(existingSub);
         }
 
-        public async Task<bool> DeleteSubCategoryAsync(int id)
+        public async Task<bool> DeleteSubCategoryAsync(Guid id)
         {
-            var subCategory = await _subCategoryRepo.GetByIdAsync(id);
+            var subCategory = await _subCategoryRepository.GetByIdAsync(id);
             if (subCategory == null) return false;
 
-            await _subCategoryRepo.Delete(subCategory);
+            _subCategoryRepository.Delete(subCategory);
+            await _subCategoryRepository.SaveChangesAsync();
             return true;
         }
     }

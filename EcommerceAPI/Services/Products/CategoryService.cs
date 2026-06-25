@@ -1,4 +1,5 @@
-﻿using EcommerceAPI.Dto.Products;
+﻿using AutoMapper;
+using EcommerceAPI.Dto.Admin.Products;
 using EcommerceAPI.Interfaces.Repositories.Products;
 using EcommerceAPI.Interfaces.Services.Products;
 using EcommerceAPI.Models.Products;
@@ -7,62 +8,65 @@ namespace EcommerceAPI.Services.Products
 {
     public class CategoryService : ICategoryService
     {
-        private readonly ICategoryRepository _categoryRepo;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly IMapper _mapper;
 
-        public CategoryService(ICategoryRepository categoryRepo)
+        public CategoryService(ICategoryRepository categoryRepository, IMapper mapper)
         {
-            _categoryRepo = categoryRepo;
+            _categoryRepository = categoryRepository;
+            _mapper = mapper;
         }
 
-        public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
+        public async Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync()
         {
-            // Use our specialized repository method to load child subcategories
-            return await _categoryRepo.GetAllWithSubCategoriesAsync();
+            var categories = await _categoryRepository.GetAllWithSubCategoriesAsync();
+
+            return _mapper.Map<IEnumerable<CategoryDto>>(categories);
         }
 
-        public async Task<Category?> GetCategoryByIdAsync(int id)
+        public async Task<CategoryDto?> GetCategoryByIdAsync(Guid id)
         {
-            // Assuming your generic repository defines GetByIdAsync(id)
-            return await _categoryRepo.GetByIdAsync(id);
+            var category = await _categoryRepository.GetByIdAsync(id);
+            if (category == null) return null;
+
+            return _mapper.Map<CategoryDto>(category);
         }
 
-        public async Task<Category> CreateCategoryAsync(CategoryDto dto)
+        public async Task<CategoryDto> CreateCategoryAsync(CategoryDto dto)
         {
-            var category = new Category
-            {
-                CategoryName = dto.CategoryName.Trim(),
-                Description = dto.Description,
-                IsActive = dto.IsActive,
-                CreatedDate = DateTime.UtcNow
-            };
+            var category = _mapper.Map<Category>(dto);
 
-            // Using generic repository Add handler
-            await _categoryRepo.AddAsync(category);
-           // await _categoryRepo.SaveChangesAsync();
-            return category;
+            category.CategoryName = dto.CategoryName.Trim(); 
+            category.CreatedDate = DateTime.UtcNow;
+
+            await _categoryRepository.AddAsync(category);
+            await _categoryRepository.SaveChangesAsync();
+
+            return _mapper.Map<CategoryDto>(category);
         }
 
-        public async Task<Category?> UpdateCategoryAsync(int id, CategoryDto dto)
+        public async Task<CategoryDto?> UpdateCategoryAsync(Guid id, CategoryDto dto)
         {
-            var existingCategory = await _categoryRepo.GetByIdAsync(id);
+            var existingCategory = await _categoryRepository.GetByIdAsync(id);
             if (existingCategory == null) return null;
 
+            _mapper.Map(dto, existingCategory);
             existingCategory.CategoryName = dto.CategoryName.Trim();
-            existingCategory.Description = dto.Description;
-            existingCategory.IsActive = dto.IsActive;
 
-            // Using generic repository Update handler
-            await _categoryRepo.Update(existingCategory);
-            return existingCategory;
+            _categoryRepository.Update(existingCategory);
+            await _categoryRepository.SaveChangesAsync();
+
+            return _mapper.Map<CategoryDto>(existingCategory);
         }
 
-        public async Task<bool> DeleteCategoryAsync(int id)
+        public async Task<bool> DeleteCategoryAsync(Guid id)
         {
-            var category = await _categoryRepo.GetByIdAsync(id);
+            var category = await _categoryRepository.GetByIdAsync(id);
             if (category == null) return false;
 
-            // Using generic repository Delete handler
-            await _categoryRepo.Delete(category);
+            _categoryRepository.Delete(category);
+            await _categoryRepository.SaveChangesAsync();
+
             return true;
         }
     }

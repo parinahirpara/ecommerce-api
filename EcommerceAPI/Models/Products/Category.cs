@@ -2,10 +2,8 @@
 
 namespace EcommerceAPI.Models.Products
 {
-    public class Category
+    public class Category : BaseEntity
     {
-        [Key]
-        public int CategoryId { get; set; }
 
         [Required]
         [StringLength(100)]

@@ -12,7 +12,7 @@ namespace EcommerceAPI.Repositories.Products
         }
 
         // Fetch subcategories filtered by a specific parent ID
-        public async Task<IEnumerable<SubCategory>> GetSubCategoriesByCategoryIdAsync(int categoryId)
+        public async Task<IEnumerable<SubCategory>> GetSubCategoriesByCategoryIdAsync(Guid categoryId)
         {
             return await _dbContextSet
                 .Where(s => s.CategoryId == categoryId)
