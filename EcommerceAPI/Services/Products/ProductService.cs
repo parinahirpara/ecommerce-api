@@ -96,16 +96,26 @@ namespace EcommerceAPI.Services.Products
                 }
             }
         }
-        public async Task<PagedResult<Customer.ProductResponseDto>> GetProductsAsync(int skip, int take, Guid? categoryId, Guid? subCategoryId)
+        public async Task<PagedResult<Customer.ProductResponseDto>> GetProductsAsync(int skip, int take, Guid? categoryId, Guid? subCategoryId, Guid? materialId)
         {
-            // 1. Retrieve the paginated db entity tracking package
-            PagedResult<Product> dbPagedResult = await _productRepository.GetPagedProductWithDetailsAsync(skip, take, categoryId, subCategoryId);
+            PagedResult<Product> dbPagedResult = await _productRepository.GetPagedProductWithDetailsAsync(skip, take, categoryId, subCategoryId, materialId);
 
-            // 2. Map the inner entity list to storefront layout view models
             var mappedStorefrontDtos = _mapper.Map<List<Customer.ProductResponseDto>>(dbPagedResult.Items);
 
-            // 3. Re-wrap into the generic pagination DTO structure for the API layer
-            return new PagedResult<Customer.ProductResponseDto>
+            if (materialId.HasValue && materialId.Value != Guid.Empty)
+            {
+                foreach (var product in mappedStorefrontDtos)
+                {
+                    if (product.Variants != null)
+                    {
+                        product.Variants = product.Variants
+                            .OrderByDescending(v => v.MaterialId == materialId.Value)
+                            .ToList();
+                    }
+                }
+            }
+             
+             return new PagedResult<Customer.ProductResponseDto>
             {
                 TotalItems = dbPagedResult.TotalItems,
                 CurrentCount = dbPagedResult.CurrentCount,

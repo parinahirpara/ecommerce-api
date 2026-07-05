@@ -1,8 +1,11 @@
 ﻿
 using AutoMapper;
+using EcommerceAPI.Dto.Admin.Page;
+using EcommerceAPI.Dto.Admin.Products;
+using EcommerceAPI.Models.Page;
+using EcommerceAPI.Models.Products;
 using Admin = EcommerceAPI.Dto.Admin.Products;
 using Customer = EcommerceAPI.Dto.Customer.Products;
-using EcommerceAPI.Models.Products;
 
 namespace EcommerceAPI.Mappings
 {
@@ -17,16 +20,26 @@ namespace EcommerceAPI.Mappings
                 .ForMember(dest => dest.CreatedDate, opt => opt.Ignore())
                 .ForMember(dest => dest.SubCategories, opt => opt.Ignore());
 
-            CreateMap<SubCategory, Admin.SubCategoryDto>();
-            CreateMap<Admin.SubCategoryDto, SubCategory>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.CreatedDate, opt => opt.Ignore())
-            .ForMember(dest => dest.Category, opt => opt.Ignore());
+            CreateMap<SubCategory, SubCategoryDto>()
+            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src =>
+                src.Category != null ? src.Category.CategoryName : string.Empty));
+
+            // 2. Mapping DTO -> Entity (For post/put mutations)
+            CreateMap<SubCategoryDto, SubCategory>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedDate, opt => opt.Ignore())
+                .ForMember(dest => dest.Category, opt => opt.Ignore()); // Prevent EF tracking noise
 
             CreateMap<Material, Admin.MaterialDto>();
             CreateMap<Admin.MaterialDto, Material>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.CreatedDate, opt => opt.Ignore());
+
+            CreateMap<PageHeader, PageHeaderDto>();
+            CreateMap<PageQuickLink, PageQuickLinkDto>();
+
+            CreateMap<PageHeaderCreateDto, PageHeader>()
+            .ForMember(dest => dest.QuickLinks, opt => opt.Ignore());
 
             CreateMap<Product, Admin.ProductDto>()
             .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.CategoryName : string.Empty))
@@ -53,8 +66,6 @@ namespace EcommerceAPI.Mappings
               );
 
             CreateMap<ProductImage, Admin.ProductImageDto>();
-
-
 
             CreateMap<Product, Customer.ProductResponseDto>()
             .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.CategoryName : string.Empty))

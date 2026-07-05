@@ -3,7 +3,6 @@ using EcommerceAPI.Dto.Common;
 using EcommerceAPI.Interfaces.Repositories.Products;
 using EcommerceAPI.Models.Products;
 using Microsoft.EntityFrameworkCore;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace EcommerceAPI.Repositories.Products
 {
@@ -28,6 +27,7 @@ namespace EcommerceAPI.Repositories.Products
                     .ThenInclude(v => v.Images)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
+
         public async Task<Product> GetProductDetailsByIdAsync(Guid id)
         {
             return await _dbContext.Products
@@ -36,9 +36,9 @@ namespace EcommerceAPI.Repositories.Products
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task<PagedResult<Product>> GetPagedProductWithDetailsAsync(int skip, int take, Guid? categoryId, Guid? subCategoryId)
+        public async Task<PagedResult<Product>> GetPagedProductWithDetailsAsync(int skip, int take, Guid? categoryId, Guid? subCategoryId, Guid? materialId)
         {
-            var baseQuery = _dbContext.Products.Where(p => p.IsActive);
+            var baseQuery = _dbContext.Products.Where(p => p.IsActive && p.Variants.Any());
 
             if (categoryId.HasValue && categoryId.Value != Guid.Empty)
             {
@@ -50,9 +50,13 @@ namespace EcommerceAPI.Repositories.Products
                 baseQuery = baseQuery.Where(p => p.SubCategoryId == subCategoryId.Value);
             }
 
+            if (materialId.HasValue && materialId.Value != Guid.Empty)
+            {
+                baseQuery = baseQuery.Where(p => p.Variants.Any(v => v.MaterialId == materialId.Value));
+            }
+
             int totalCount = await baseQuery.CountAsync();
 
-            // 3. Complete Eager Loading Graph
             var items = await baseQuery
                 .Include(p => p.Category)
                 .Include(p => p.SubCategory)

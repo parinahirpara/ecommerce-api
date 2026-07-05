@@ -8,6 +8,6 @@ namespace EcommerceAPI.Interfaces.Repositories.Products
         Task<IEnumerable<Product>> GetAllWithDetailsAsync();
         Task<Product?> GetWithDetailsAsync(Guid id);
         Task<Product> GetProductDetailsByIdAsync(Guid id);
-        Task<PagedResult<Product>> GetPagedProductWithDetailsAsync(int skip, int take,Guid? categoryId, Guid? subCategoryId);
+        Task<PagedResult<Product>> GetPagedProductWithDetailsAsync(int skip, int take,Guid? categoryId, Guid? subCategoryId, Guid? materialId);
     }
 }

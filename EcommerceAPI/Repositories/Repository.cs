@@ -1,7 +1,6 @@
 ﻿using EcommerceAPI.Data;
 using EcommerceAPI.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace EcommerceAPI.Repositories
 {
@@ -39,6 +38,10 @@ namespace EcommerceAPI.Repositories
         public virtual async Task<T?> GetByIdAsync(object id)
         {
             return await _dbContextSet.FindAsync(id);
+        }
+        public IQueryable<T> GetAllQueryable()
+        {
+            return _dbContextSet.AsNoTracking();
         }
         public async Task<int> SaveChangesAsync()
         {

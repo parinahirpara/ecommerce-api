@@ -1,7 +1,7 @@
 ﻿using EcommerceAPI.Models;
+using EcommerceAPI.Models.Page;
 using EcommerceAPI.Models.Products;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
 
 namespace EcommerceAPI.Data
 {
@@ -19,6 +19,9 @@ namespace EcommerceAPI.Data
         public DbSet<ProductVariant> ProductVariants { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
         public DbSet<Material> Materials { get; set; }
+        public DbSet<PageHeader> PageHeaders { get; set; }
+        public DbSet<PageQuickLink> PageQuickLinks { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -45,6 +48,8 @@ namespace EcommerceAPI.Data
             modelBuilder.Entity<ProductVariant>().Property(v => v.Price).HasPrecision(18, 2);
             modelBuilder.Entity<ProductVariant>().Property(v => v.Weight).HasPrecision(18, 2);
             modelBuilder.Entity<ProductVariant>().Property(v => v.DiscountPercentage).HasPrecision(5, 2);
+            modelBuilder.Entity<PageHeader>().HasIndex(p => p.PageKey).IsUnique();
+            modelBuilder.Entity<PageQuickLink>().HasOne(link => link.PageHeader).WithMany(page => page.QuickLinks).HasForeignKey(link => link.PageHeaderId).OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

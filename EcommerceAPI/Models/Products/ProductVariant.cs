@@ -9,7 +9,6 @@ namespace EcommerceAPI.Models.Products
         public string VariantSKU { get; set; } = string.Empty;
         public string Size { get; set; } = string.Empty;
 
-        //public List<string> Size { get; set; } = new List<string>();
         public Guid MaterialId { get; set; }
         public decimal Weight { get; set; }
         public decimal Price { get; set; }

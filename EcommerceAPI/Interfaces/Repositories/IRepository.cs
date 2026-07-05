@@ -10,6 +10,7 @@ namespace EcommerceAPI.Interfaces.Repositories
         Task<IEnumerable<T>> GetAllAsync();
         void Delete(T entity);
         void Update(T entity);
+        IQueryable<T> GetAllQueryable();
         Task<T?> GetByIdAsync(object id);
         Task<int> SaveChangesAsync();
     }

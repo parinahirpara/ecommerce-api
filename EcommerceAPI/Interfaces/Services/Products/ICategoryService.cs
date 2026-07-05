@@ -1,5 +1,4 @@
 ﻿using EcommerceAPI.Dto.Admin.Products;
-using EcommerceAPI.Models.Products;
 
 namespace EcommerceAPI.Interfaces.Services.Products
 {

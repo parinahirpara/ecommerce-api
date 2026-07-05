@@ -22,6 +22,63 @@ namespace EcommerceAPI.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("EcommerceAPI.Models.Navigations.PageHeader", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PageKey")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("PageTitle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PageKey")
+                        .IsUnique();
+
+                    b.ToTable("PageHeaders");
+                });
+
+            modelBuilder.Entity("EcommerceAPI.Models.Navigations.PageQuickLink", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("PageHeaderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Route")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PageHeaderId");
+
+                    b.ToTable("PageQuickLinks");
+                });
+
             modelBuilder.Entity("EcommerceAPI.Models.Products.Category", b =>
                 {
                     b.Property<Guid>("Id")
@@ -273,6 +330,17 @@ namespace EcommerceAPI.Migrations
                     b.ToTable("Staffs");
                 });
 
+            modelBuilder.Entity("EcommerceAPI.Models.Navigations.PageQuickLink", b =>
+                {
+                    b.HasOne("EcommerceAPI.Models.Navigations.PageHeader", "PageHeader")
+                        .WithMany("QuickLinks")
+                        .HasForeignKey("PageHeaderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PageHeader");
+                });
+
             modelBuilder.Entity("EcommerceAPI.Models.Products.Product", b =>
                 {
                     b.HasOne("EcommerceAPI.Models.Products.Category", "Category")
@@ -338,6 +406,11 @@ namespace EcommerceAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("EcommerceAPI.Models.Navigations.PageHeader", b =>
+                {
+                    b.Navigation("QuickLinks");
                 });
 
             modelBuilder.Entity("EcommerceAPI.Models.Products.Category", b =>

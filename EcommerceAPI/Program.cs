@@ -1,12 +1,18 @@
 using EcommerceAPI.Data;
 using EcommerceAPI.Interfaces.Repositories;
+using EcommerceAPI.Interfaces.Repositories.Page;
 using EcommerceAPI.Interfaces.Repositories.Products;
 using EcommerceAPI.Interfaces.Services;
+using EcommerceAPI.Interfaces.Services.Navigation;
+using EcommerceAPI.Interfaces.Services.Page;
 using EcommerceAPI.Interfaces.Services.Products;
 using EcommerceAPI.Mappings;
 using EcommerceAPI.Repositories;
+using EcommerceAPI.Repositories.Page;
 using EcommerceAPI.Repositories.Products;
 using EcommerceAPI.Services;
+using EcommerceAPI.Services.Navigation;
+using EcommerceAPI.Services.Page;
 using EcommerceAPI.Services.Products;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +42,8 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductVariantRepository, ProductVariantRepository>();
 builder.Services.AddScoped<IProductImageRepository, ProductImageRepository>();
 builder.Services.AddScoped<IMaterialRepository, MaterialRepository>();
+builder.Services.AddScoped<IPageHeaderRepository, PageHeaderRepository>();
+builder.Services.AddScoped<IPageQuickLinkRepository, PageQuickLinkRepository>();
 
 builder.Services.AddScoped<IStaffService, StaffService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -44,6 +52,8 @@ builder.Services.AddScoped<ISubCategoryService, SubCategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IProductVariantService, ProductVariantService>();
 builder.Services.AddScoped<IMaterialService, MaterialService>();
+builder.Services.AddScoped<INavigationService, NavigationService>();
+builder.Services.AddScoped<IPageHeaderService, PageHeaderService>();
 
 builder.Services.AddCors(options =>
 {
